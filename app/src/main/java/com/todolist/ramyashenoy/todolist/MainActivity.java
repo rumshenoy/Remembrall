@@ -1,5 +1,6 @@
 package com.todolist.ramyashenoy.todolist;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.apache.commons.io.FileUtils;
 
@@ -19,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> items;
     ListView lvItems;
     ArrayAdapter<String> itemsAdapter;
+    private final int REQUEST_CODE = 20;
 
 
     @Override
@@ -29,12 +32,27 @@ public class MainActivity extends AppCompatActivity {
         readItems();
         lvItems = (ListView) findViewById(R.id.lvItems);
         items = new ArrayList<>();
-        itemsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
+        itemsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items);
         lvItems.setAdapter(itemsAdapter);
-        setUpListViewListerner();
+        setUpListViewListener();
+
     }
 
-    private void setUpListViewListerner() {
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
+            String taskName = data.getExtras().getString("taskName");
+            int position = data.getExtras().getInt("position", 0);
+
+            items.set(position, taskName);
+            itemsAdapter.notifyDataSetChanged();
+
+            writeItems();
+            Toast.makeText(this, taskName, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void setUpListViewListener() {
         lvItems.setOnItemLongClickListener(new OnItemLongClickListener(){
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
@@ -44,15 +62,26 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+
+        lvItems.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String taskName = (String) lvItems.getItemAtPosition(position);
+                Intent intent = new Intent(MainActivity.this, EditItemActivity.class);
+                intent.putExtra("taskName", taskName);
+                intent.putExtra("position", position);
+                startActivityForResult(intent, REQUEST_CODE);
+            }
+        });
     }
 
     private void readItems(){
         File filesDir = getFilesDir();
         File toDoFile = new File(filesDir, "todo.txt");
         try{
-            items = new ArrayList<String>(FileUtils.readLines(toDoFile));
+            items = new ArrayList<>(FileUtils.readLines(toDoFile));
         }catch(IOException e){
-            items = new ArrayList<String>();
+            items = new ArrayList<>();
         }
     }
 
