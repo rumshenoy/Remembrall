@@ -12,6 +12,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.todolist.ramyashenoy.todolist.persistence.ToDoListDatabaseHelper;
+import com.todolist.ramyashenoy.todolist.persistence.models.Task;
 
 import org.apache.commons.io.FileUtils;
 
@@ -33,15 +34,22 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         dbHelper = ToDoListDatabaseHelper.getInstance(getApplicationContext());
 
-        readItems();
         lvItems = (ListView) findViewById(R.id.lvItems);
-        items = new ArrayList<>();
+        items = populateTasksFromDb();
         itemsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items);
         lvItems.setAdapter(itemsAdapter);
         setUpListViewListener();
 
     }
 
+    private ArrayList<String> populateTasksFromDb(){
+        ArrayList<String> tasks = new ArrayList<>();
+        for(Task t: dbHelper.getAllTasks()){
+            tasks.add(t.title);
+        }
+
+        return tasks;
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
@@ -62,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 items.remove(position);
                 itemsAdapter.notifyDataSetChanged();
-                writeItems();
                 return true;
             }
         });
@@ -104,6 +111,10 @@ public class MainActivity extends AppCompatActivity {
         String itemText = etNewItem.getText().toString();
         itemsAdapter.add(itemText);
         etNewItem.setText("");
+
+        Task newTask = new Task();
+        newTask.title = itemText;
+        dbHelper.addTask(newTask);
         writeItems();
     }
 }

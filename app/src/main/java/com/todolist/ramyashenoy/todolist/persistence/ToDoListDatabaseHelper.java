@@ -99,7 +99,7 @@ public class ToDoListDatabaseHelper extends SQLiteOpenHelper {
             ContentValues values = new ContentValues();
             values.put(COLUMN_NAME_TITLE, task.title);
             values.put(COLUMN_NAME_DATE_CREATED, new SimpleDateFormat("MM/dd/yyyy").format(new Date()));
-            values.put(COLUMN_NAME_DUE_DATE, new SimpleDateFormat("MM/dd/yyyy").format(task.dueDate));
+            values.put(COLUMN_NAME_DUE_DATE, task.dueDate != null? new SimpleDateFormat("MM/dd/yyyy").format(task.dueDate) : null);
             values.put(COLUMN_NAME_DETAILS, task.details);
             values.put(COLUMN_NAME_PRIORITY, String.valueOf(task.priority));
 

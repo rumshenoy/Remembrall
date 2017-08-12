@@ -13,4 +13,8 @@ public class Task {
     public Date dateCreated;
     public TaskPriority priority;
     public int id;
+
+    public String getTitle(){
+        return title;
+    }
 }
