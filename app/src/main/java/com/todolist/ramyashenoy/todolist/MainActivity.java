@@ -11,6 +11,8 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.todolist.ramyashenoy.todolist.persistence.ToDoListDatabaseHelper;
+
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -22,12 +24,14 @@ public class MainActivity extends AppCompatActivity {
     ListView lvItems;
     ArrayAdapter<String> itemsAdapter;
     private final int REQUEST_CODE = 20;
+    private ToDoListDatabaseHelper dbHelper;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        dbHelper = ToDoListDatabaseHelper.getInstance(getApplicationContext());
 
         readItems();
         lvItems = (ListView) findViewById(R.id.lvItems);
