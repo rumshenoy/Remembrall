@@ -100,8 +100,8 @@ public class ToDoListDatabaseHelper extends SQLiteOpenHelper {
             values.put(COLUMN_NAME_TITLE, task.title);
             values.put(COLUMN_NAME_DATE_CREATED, new SimpleDateFormat("MM/dd/yyyy").format(new Date()));
             values.put(COLUMN_NAME_DUE_DATE, new SimpleDateFormat("MM/dd/yyyy").format(task.dueDate));
-            values.put(COLUMN_NAME_DETAILS, new SimpleDateFormat("MM/dd/yyyy").format(task.details));
-            values.put(COLUMN_NAME_PRIORITY, new SimpleDateFormat("MM/dd/yyyy").format(task.priority));
+            values.put(COLUMN_NAME_DETAILS, task.details);
+            values.put(COLUMN_NAME_PRIORITY, String.valueOf(task.priority));
 
             db.insertOrThrow(TABLE_TASKS, null, values);
             db.setTransactionSuccessful();
@@ -112,7 +112,7 @@ public class ToDoListDatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public List<Task> getAllPosts() {
+    public List<Task> getAllTasks() {
         List<Task> tasks = new ArrayList<>();
 
         // SELECT * FROM TASK

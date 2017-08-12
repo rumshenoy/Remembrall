@@ -5,5 +5,5 @@ package com.todolist.ramyashenoy.todolist.persistence.models;
  */
 
 enum TaskPriority {
-    URGENT, NOT_URGENT
+    HIGH, LOW
 }
