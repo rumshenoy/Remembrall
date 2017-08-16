@@ -3,10 +3,11 @@ package com.todolist.ramyashenoy.todolist;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -14,53 +15,51 @@ import android.widget.Toast;
 import com.todolist.ramyashenoy.todolist.persistence.ToDoListDatabaseHelper;
 import com.todolist.ramyashenoy.todolist.persistence.models.Task;
 
-import org.apache.commons.io.FileUtils;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-    ArrayList<String> items;
+    ArrayList<Task> tasks;
     ListView lvItems;
-    ArrayAdapter<String> itemsAdapter;
+    TasksAdapter tasksAdapter;
     private final int REQUEST_CODE = 20;
     private ToDoListDatabaseHelper dbHelper;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
+
         dbHelper = ToDoListDatabaseHelper.getInstance(getApplicationContext());
 
+        tasks = dbHelper.getAllTasks();
+        tasksAdapter = new TasksAdapter(this, tasks);
+
         lvItems = (ListView) findViewById(R.id.lvItems);
-        items = populateTasksFromDb();
-        itemsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, items);
-        lvItems.setAdapter(itemsAdapter);
+        lvItems.setAdapter(tasksAdapter);
         setUpListViewListener();
 
     }
 
-    private ArrayList<String> populateTasksFromDb(){
-        ArrayList<String> tasks = new ArrayList<>();
-        for(Task t: dbHelper.getAllTasks()){
-            tasks.add(t.title);
-        }
-
-        return tasks;
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_add, menu);
+        return true;
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
-            String taskName = data.getExtras().getString("taskName");
+            int id = data.getExtras().getInt("id");
             int position = data.getExtras().getInt("position", 0);
 
-            items.set(position, taskName);
-            itemsAdapter.notifyDataSetChanged();
+            Task task = dbHelper.getTask(id);
+            tasks.set(position, task);
+            tasksAdapter.notifyDataSetChanged();
 
-            writeItems();
-            Toast.makeText(this, taskName, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, task.title, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -68,8 +67,10 @@ public class MainActivity extends AppCompatActivity {
         lvItems.setOnItemLongClickListener(new OnItemLongClickListener(){
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                items.remove(position);
-                itemsAdapter.notifyDataSetChanged();
+                Task taskToDelete = (Task) lvItems.getItemAtPosition(position);
+                tasks.remove(position);
+                tasksAdapter.notifyDataSetChanged();
+                dbHelper.deleteTask(taskToDelete);
                 return true;
             }
         });
@@ -77,44 +78,24 @@ public class MainActivity extends AppCompatActivity {
         lvItems.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String taskName = (String) lvItems.getItemAtPosition(position);
+                Task task = (Task) lvItems.getItemAtPosition(position);
                 Intent intent = new Intent(MainActivity.this, EditItemActivity.class);
-                intent.putExtra("taskName", taskName);
+                intent.putExtra("taskName", task.title);
                 intent.putExtra("position", position);
+                intent.putExtra("id", task.id);
                 startActivityForResult(intent, REQUEST_CODE);
             }
         });
     }
 
-    private void readItems(){
-        File filesDir = getFilesDir();
-        File toDoFile = new File(filesDir, "todo.txt");
-        try{
-            items = new ArrayList<>(FileUtils.readLines(toDoFile));
-        }catch(IOException e){
-            items = new ArrayList<>();
-        }
-    }
-
-    private void writeItems(){
-        File filesDir = getFilesDir();
-        File todoFile = new File(filesDir, "todo.txt");
-        try{
-            FileUtils.writeLines(todoFile, items);
-        }catch(IOException e){
-            e.printStackTrace();
-        }
-    }
-
     public void OnAddItem(View v){
         EditText etNewItem = (EditText) findViewById(R.id.etNewItems);
         String itemText = etNewItem.getText().toString();
-        itemsAdapter.add(itemText);
+        tasksAdapter.add(itemText);
         etNewItem.setText("");
 
         Task newTask = new Task();
         newTask.title = itemText;
         dbHelper.addTask(newTask);
-        writeItems();
     }
 }

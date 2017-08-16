@@ -12,7 +12,6 @@ import com.todolist.ramyashenoy.todolist.persistence.models.Task;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import static android.content.ContentValues.TAG;
 
@@ -98,6 +97,7 @@ public class ToDoListDatabaseHelper extends SQLiteOpenHelper {
         try {
             ContentValues values = new ContentValues();
             values.put(COLUMN_NAME_TITLE, task.title);
+            values.put(COLUMN_TASK_ID, task.id);
             values.put(COLUMN_NAME_DATE_CREATED, new SimpleDateFormat("MM/dd/yyyy").format(new Date()));
             values.put(COLUMN_NAME_DUE_DATE, task.dueDate != null? new SimpleDateFormat("MM/dd/yyyy").format(task.dueDate) : null);
             values.put(COLUMN_NAME_DETAILS, task.details);
@@ -112,8 +112,8 @@ public class ToDoListDatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    public List<Task> getAllTasks() {
-        List<Task> tasks = new ArrayList<>();
+    public ArrayList<Task> getAllTasks() {
+        ArrayList<Task> tasks = new ArrayList<>();
 
         // SELECT * FROM TASK
         String TASKS_SELECT_QUERY =
@@ -164,4 +164,30 @@ public class ToDoListDatabaseHelper extends SQLiteOpenHelper {
         return db.delete(TABLE_TASKS, COLUMN_TASK_ID + "= ?", new String[] {String.valueOf(task.id)});
     }
 
+    public Task getTask(int id) {
+        // SELECT * FROM TASK WHERE ID=id
+        String TASKS_SELECT_QUERY =
+                String.format("SELECT * FROM %s where %s=%s",
+                        TABLE_TASKS, COLUMN_TASK_ID, id);
+        SQLiteDatabase db = getReadableDatabase();
+        Task task = null;
+        Cursor cursor = null;
+
+        try {
+            cursor = db.rawQuery(TASKS_SELECT_QUERY, null);
+
+            if(cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                task = new Task();
+                task.title = cursor.getString(cursor.getColumnIndex(COLUMN_NAME_TITLE));
+                task.id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(COLUMN_TASK_ID)));
+            }
+            return task;
+        } catch (Exception e) {
+            Log.d(TAG, "Error while trying to get task from database");
+        } finally {
+
+        }
+        return task;
+    }
 }

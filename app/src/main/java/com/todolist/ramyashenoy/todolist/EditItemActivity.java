@@ -9,6 +9,7 @@ import android.widget.EditText;
 public class EditItemActivity extends AppCompatActivity {
 
     int position;
+    int id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +23,7 @@ public class EditItemActivity extends AppCompatActivity {
     private void setBodyOfEditText() {
         String taskName = getIntent().getStringExtra("taskName");
         position = getIntent().getIntExtra("position", 0);
+        id = getIntent().getIntExtra("id", 0);
 
         EditText editText = (EditText) findViewById(R.id.editText);
         editText.setText(taskName);
@@ -32,6 +34,7 @@ public class EditItemActivity extends AppCompatActivity {
         EditText etName = (EditText) findViewById(R.id.editText);
         Intent data = new Intent();
         data.putExtra("taskName", etName.getText().toString());
+        data.putExtra("id", id);
         data.putExtra("position", position); // ints work too
 
         setResult(RESULT_OK, data);
