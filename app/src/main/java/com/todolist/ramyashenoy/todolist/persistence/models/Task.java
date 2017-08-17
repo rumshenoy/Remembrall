@@ -8,11 +8,10 @@ import java.util.Date;
 
 public class Task {
     public String title;
-    public String details;
+    public String description;
     public Date dueDate;
-    public Date dateCreated;
     public TaskPriority priority;
-    public int id;
+    public Integer id;
 
     public String getTitle(){
         return title;

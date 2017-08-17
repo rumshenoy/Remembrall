@@ -5,10 +5,10 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -50,13 +50,31 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.menu_add_task:
+                showAddEditActivity();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void showAddEditActivity() {
+        Intent intent = new Intent(MainActivity.this, EditItemActivity.class);
+        startActivityForResult(intent, REQUEST_CODE);
+    }
+
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
-            int id = data.getExtras().getInt("id");
-            int position = data.getExtras().getInt("position", 0);
+            Bundle extras = data.getExtras();
+            long id = extras.getLong("id");
 
             Task task = dbHelper.getTask(id);
-            tasks.set(position, task);
+            tasks.set(0, task);
             tasksAdapter.notifyDataSetChanged();
 
             Toast.makeText(this, task.title, Toast.LENGTH_SHORT).show();
@@ -88,14 +106,14 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void OnAddItem(View v){
-        EditText etNewItem = (EditText) findViewById(R.id.etNewItems);
-        String itemText = etNewItem.getText().toString();
-        tasksAdapter.add(itemText);
-        etNewItem.setText("");
-
-        Task newTask = new Task();
-        newTask.title = itemText;
-        dbHelper.addTask(newTask);
-    }
+//    public void OnAddItem(View v){
+//        EditText etNewItem = (EditText) findViewById(R.id.etNewItems);
+//        String itemText = etNewItem.getText().toString();
+//        tasksAdapter.add(itemText);
+//        etNewItem.setText("");
+//
+//        Task newTask = new Task();
+//        newTask.title = itemText;
+//        dbHelper.addTask(newTask);
+//    }
 }

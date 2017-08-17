@@ -38,7 +38,7 @@ public class ToDoListDatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_NAME_TITLE = "title";
     public static final String COLUMN_NAME_DATE_CREATED = "date_created";
     public static final String COLUMN_NAME_DUE_DATE = "date_due";
-    public static final String COLUMN_NAME_DETAILS = "details";
+    public static final String COLUMN_NAME_DESCRIPTION = "description";
     public static final String COLUMN_NAME_PRIORITY = "priority";
     
 
@@ -49,14 +49,14 @@ public class ToDoListDatabaseHelper extends SQLiteOpenHelper {
                     COLUMN_NAME_DATE_CREATED + " DATE," +
                     COLUMN_NAME_DUE_DATE + " DATE," +
                     COLUMN_NAME_PRIORITY + " TEXT," +
-                    COLUMN_NAME_DETAILS + " TEXT)";
+                    COLUMN_NAME_DESCRIPTION + " TEXT)";
 
     private static final String SQL_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + TABLE_TASKS;
 
     // If you change the database schema, you must increment the database version.
     public static final int DATABASE_VERSION = 1;
-    public static final String DATABASE_NAME = "TodoList.db";
+    public static final String DATABASE_NAME = "Task.db";
 
     private ToDoListDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -89,9 +89,10 @@ public class ToDoListDatabaseHelper extends SQLiteOpenHelper {
     }
 
     // Insert a task into the database
-    public void addTask(Task task) {
+    public long addTask(Task task) {
         // Create and/or open the database for writing
         SQLiteDatabase db = getWritableDatabase();
+        long taskId = 0;
 
         db.beginTransaction();
         try {
@@ -100,16 +101,17 @@ public class ToDoListDatabaseHelper extends SQLiteOpenHelper {
             values.put(COLUMN_TASK_ID, task.id);
             values.put(COLUMN_NAME_DATE_CREATED, new SimpleDateFormat("MM/dd/yyyy").format(new Date()));
             values.put(COLUMN_NAME_DUE_DATE, task.dueDate != null? new SimpleDateFormat("MM/dd/yyyy").format(task.dueDate) : null);
-            values.put(COLUMN_NAME_DETAILS, task.details);
+            values.put(COLUMN_NAME_DESCRIPTION, task.description);
             values.put(COLUMN_NAME_PRIORITY, String.valueOf(task.priority));
 
-            db.insertOrThrow(TABLE_TASKS, null, values);
+            taskId = db.insert(TABLE_TASKS, null, values);
             db.setTransactionSuccessful();
         } catch (Exception e) {
             Log.d(TAG, "Error while trying to add task to database");
         } finally {
             db.endTransaction();
         }
+        return taskId;
     }
 
     public ArrayList<Task> getAllTasks() {
@@ -127,7 +129,7 @@ public class ToDoListDatabaseHelper extends SQLiteOpenHelper {
                 do {
 
                     Task newTask = new Task();
-                    newTask.details = cursor.getString(cursor.getColumnIndex(COLUMN_NAME_DETAILS));
+                    newTask.description = cursor.getString(cursor.getColumnIndex(COLUMN_NAME_DESCRIPTION));
                     newTask.title = cursor.getString(cursor.getColumnIndex(COLUMN_NAME_TITLE));
                     newTask.id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(COLUMN_TASK_ID)));
                     tasks.add(newTask);
@@ -147,7 +149,7 @@ public class ToDoListDatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(COLUMN_NAME_DETAILS, task.details);
+        values.put(COLUMN_NAME_DESCRIPTION, task.description);
         values.put(COLUMN_NAME_TITLE, task.title);
 
         return db.update(TABLE_TASKS, values, COLUMN_TASK_ID + " = ?",
@@ -158,13 +160,13 @@ public class ToDoListDatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(COLUMN_NAME_DETAILS, task.details);
+        values.put(COLUMN_NAME_DESCRIPTION, task.description);
         values.put(COLUMN_NAME_TITLE, task.title);
 
         return db.delete(TABLE_TASKS, COLUMN_TASK_ID + "= ?", new String[] {String.valueOf(task.id)});
     }
 
-    public Task getTask(int id) {
+    public Task getTask(long id) {
         // SELECT * FROM TASK WHERE ID=id
         String TASKS_SELECT_QUERY =
                 String.format("SELECT * FROM %s where %s=%s",
