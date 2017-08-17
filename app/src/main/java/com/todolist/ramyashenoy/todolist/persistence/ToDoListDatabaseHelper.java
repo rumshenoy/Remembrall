@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.todolist.ramyashenoy.todolist.persistence.models.Task;
+import com.todolist.ramyashenoy.todolist.persistence.models.TaskPriority;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -56,7 +57,7 @@ public class ToDoListDatabaseHelper extends SQLiteOpenHelper {
 
     // If you change the database schema, you must increment the database version.
     public static final int DATABASE_VERSION = 1;
-    public static final String DATABASE_NAME = "Task.db";
+    public static final String DATABASE_NAME = "Remembrall.db";
 
     private ToDoListDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -132,6 +133,8 @@ public class ToDoListDatabaseHelper extends SQLiteOpenHelper {
                     newTask.description = cursor.getString(cursor.getColumnIndex(COLUMN_NAME_DESCRIPTION));
                     newTask.title = cursor.getString(cursor.getColumnIndex(COLUMN_NAME_TITLE));
                     newTask.id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(COLUMN_TASK_ID)));
+                    newTask.priority = TaskPriority.valueOf(cursor.getString(cursor.getColumnIndex(COLUMN_NAME_PRIORITY)));
+                    newTask.dueDate = new SimpleDateFormat("MM/dd/yyyy").parse(cursor.getString(cursor.getColumnIndex(COLUMN_NAME_DUE_DATE)));
                     tasks.add(newTask);
                 } while(cursor.moveToNext());
             }
@@ -151,6 +154,8 @@ public class ToDoListDatabaseHelper extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME_DESCRIPTION, task.description);
         values.put(COLUMN_NAME_TITLE, task.title);
+        values.put(COLUMN_NAME_PRIORITY, task.priority.toString());
+        values.put(COLUMN_NAME_DUE_DATE, new SimpleDateFormat("MM/dd/yyyy").format(task.dueDate));
 
         return db.update(TABLE_TASKS, values, COLUMN_TASK_ID + " = ?",
                 new String[] { String.valueOf(task.id) });
@@ -183,12 +188,12 @@ public class ToDoListDatabaseHelper extends SQLiteOpenHelper {
                 task = new Task();
                 task.title = cursor.getString(cursor.getColumnIndex(COLUMN_NAME_TITLE));
                 task.id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(COLUMN_TASK_ID)));
+                task.priority = TaskPriority.valueOf(cursor.getString(cursor.getColumnIndex(COLUMN_NAME_PRIORITY)));
+                task.dueDate = new SimpleDateFormat("MM/dd/yyyy").parse(cursor.getString(cursor.getColumnIndex(COLUMN_NAME_DUE_DATE)));
             }
-            return task;
         } catch (Exception e) {
             Log.d(TAG, "Error while trying to get task from database");
         } finally {
-
         }
         return task;
     }

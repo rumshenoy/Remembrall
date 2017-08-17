@@ -24,10 +24,14 @@ public class TasksAdapter extends ArrayAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         Task task = (Task) getItem(position);
         if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_task, parent, false);
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.listview_row, parent, false);
         }
-        TextView tvName = (TextView) convertView.findViewById(R.id.taskTitle);
-        tvName.setText(task.title);
+        TextView rowTitle = (TextView) convertView.findViewById(R.id.row_title);
+        rowTitle.setText(task.title);
+
+        TextView rowPriority = (TextView) convertView.findViewById(R.id.row_priority);
+        rowPriority.setText(task.priority.toString());
+
         return convertView;
     }
 

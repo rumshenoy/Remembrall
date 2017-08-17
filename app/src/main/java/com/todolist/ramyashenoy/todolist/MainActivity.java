@@ -16,6 +16,8 @@ import com.todolist.ramyashenoy.todolist.persistence.ToDoListDatabaseHelper;
 import com.todolist.ramyashenoy.todolist.persistence.models.Task;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class MainActivity extends AppCompatActivity {
     ArrayList<Task> tasks;
@@ -62,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showAddEditActivity() {
-        Intent intent = new Intent(MainActivity.this, EditItemActivity.class);
+        Intent intent = new Intent(MainActivity.this, AddEditItemActivity.class);
         startActivityForResult(intent, REQUEST_CODE);
     }
 
@@ -72,17 +74,32 @@ public class MainActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
             Bundle extras = data.getExtras();
             long id = extras.getLong("id");
+            int position = extras.getInt("position");
 
             Task task = dbHelper.getTask(id);
-            tasks.set(0, task);
+            if(position > 0){
+                tasks.set(position, task);
+            }else{
+                tasks.add(task);
+            }
+            sortTasksByPriority();
             tasksAdapter.notifyDataSetChanged();
 
             Toast.makeText(this, task.title, Toast.LENGTH_SHORT).show();
         }
     }
 
+    private void sortTasksByPriority() {
+        Collections.sort(tasks, new Comparator<Task>(){
+            @Override
+            public int compare(Task o1, Task o2) {
+                return o1.priority.compareTo(o2.priority);
+            }
+        });
+    }
+
     private void setUpListViewListener() {
-        lvItems.setOnItemLongClickListener(new OnItemLongClickListener(){
+        lvItems.setOnItemLongClickListener(new OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 Task taskToDelete = (Task) lvItems.getItemAtPosition(position);
@@ -93,27 +110,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        lvItems.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+        lvItems.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Task task = (Task) lvItems.getItemAtPosition(position);
-                Intent intent = new Intent(MainActivity.this, EditItemActivity.class);
-                intent.putExtra("taskName", task.title);
-                intent.putExtra("position", position);
+                Intent intent = new Intent(MainActivity.this, AddEditItemActivity.class);
                 intent.putExtra("id", task.id);
+                intent.putExtra("position", position);
                 startActivityForResult(intent, REQUEST_CODE);
             }
         });
     }
-
-//    public void OnAddItem(View v){
-//        EditText etNewItem = (EditText) findViewById(R.id.etNewItems);
-//        String itemText = etNewItem.getText().toString();
-//        tasksAdapter.add(itemText);
-//        etNewItem.setText("");
-//
-//        Task newTask = new Task();
-//        newTask.title = itemText;
-//        dbHelper.addTask(newTask);
-//    }
 }
