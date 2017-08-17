@@ -20,6 +20,7 @@ public class AddEditItemActivity extends AppCompatActivity {
 
     int position;
     long id;
+    private final int REQUEST_CODE = 20;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +36,7 @@ public class AddEditItemActivity extends AppCompatActivity {
             populateEmptyView();
         }
     }
+
 
     private void populateEmptyView() {
         EditText title = (EditText) findViewById(R.id.add_edit_title);

@@ -3,9 +3,6 @@ package com.todolist.ramyashenoy.todolist;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -31,9 +28,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        setSupportActionBar(myToolbar);
-
         dbHelper = ToDoListDatabaseHelper.getInstance(getApplicationContext());
 
         tasks = dbHelper.getAllTasks();
@@ -45,25 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_add, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
-        switch (item.getItemId()) {
-            case R.id.menu_add_task:
-                showAddEditActivity();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    private void showAddEditActivity() {
+    public void showAddEditActivity(View view) {
         Intent intent = new Intent(MainActivity.this, AddEditItemActivity.class);
         startActivityForResult(intent, REQUEST_CODE);
     }
@@ -75,10 +51,14 @@ public class MainActivity extends AppCompatActivity {
             Bundle extras = data.getExtras();
             long id = extras.getLong("id");
             int position = extras.getInt("position");
+            String actionType = extras.getString("actionType");
 
             Task task = dbHelper.getTask(id);
             if(position > 0){
                 tasks.set(position, task);
+            }
+            else if(actionType == "delete"){
+                tasks.remove(position);
             }else{
                 tasks.add(task);
             }
@@ -105,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
                 Task taskToDelete = (Task) lvItems.getItemAtPosition(position);
                 tasks.remove(position);
                 tasksAdapter.notifyDataSetChanged();
-                dbHelper.deleteTask(taskToDelete);
+                dbHelper.deleteTask(taskToDelete.id);
                 return true;
             }
         });
@@ -114,9 +94,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Task task = (Task) lvItems.getItemAtPosition(position);
-                Intent intent = new Intent(MainActivity.this, AddEditItemActivity.class);
+                Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
                 intent.putExtra("id", task.id);
-                intent.putExtra("position", position);
                 startActivityForResult(intent, REQUEST_CODE);
             }
         });

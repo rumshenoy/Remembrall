@@ -161,14 +161,9 @@ public class ToDoListDatabaseHelper extends SQLiteOpenHelper {
                 new String[] { String.valueOf(task.id) });
     }
 
-    public int deleteTask(Task task) {
+    public int deleteTask(long taskId) {
         SQLiteDatabase db = this.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_NAME_DESCRIPTION, task.description);
-        values.put(COLUMN_NAME_TITLE, task.title);
-
-        return db.delete(TABLE_TASKS, COLUMN_TASK_ID + "= ?", new String[] {String.valueOf(task.id)});
+        return db.delete(TABLE_TASKS, COLUMN_TASK_ID + "= ?", new String[] {String.valueOf(taskId)});
     }
 
     public Task getTask(long id) {
