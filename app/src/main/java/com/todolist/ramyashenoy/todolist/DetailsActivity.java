@@ -9,6 +9,8 @@ import android.widget.TextView;
 import com.todolist.ramyashenoy.todolist.persistence.ToDoListDatabaseHelper;
 import com.todolist.ramyashenoy.todolist.persistence.models.Task;
 
+import java.text.SimpleDateFormat;
+
 public class DetailsActivity extends AppCompatActivity {
     int position;
     long id;
@@ -49,7 +51,7 @@ public class DetailsActivity extends AppCompatActivity {
         priority.setText(editTask.priority.toString());
 
         TextView dueDate = (TextView) findViewById(R.id.detail_due_date);
-        dueDate.setText(editTask.dueDate.toString());
+        dueDate.setText(new SimpleDateFormat("MMM dd YYYY").format(editTask.dueDate));
     }
 
     public void dismiss(View view) {

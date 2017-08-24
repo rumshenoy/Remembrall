@@ -14,7 +14,6 @@ import com.todolist.ramyashenoy.todolist.persistence.models.Task;
 import com.todolist.ramyashenoy.todolist.persistence.models.TaskPriority;
 
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 public class AddEditItemActivity extends AppCompatActivity {
 
@@ -55,9 +54,9 @@ public class AddEditItemActivity extends AppCompatActivity {
         description.setText(editTask.description);
 
         DatePicker dueDate = (DatePicker) findViewById(R.id.add_edit_due_date);
-        Calendar calendar = new GregorianCalendar();
+        Calendar calendar = Calendar.getInstance();
         calendar.setTime(editTask.dueDate);
-        dueDate.updateDate(calendar.YEAR, calendar.MONTH, calendar.DAY_OF_MONTH);
+        dueDate.updateDate(calendar.get(calendar.YEAR), calendar.get(calendar.MONTH), calendar.get(calendar.DAY_OF_MONTH));
 
         Spinner priority =  (Spinner) findViewById(R.id.priority_dropdown);
         priority.setSelection(((ArrayAdapter<String>)priority.getAdapter()).getPosition(editTask.priority.toString()));
